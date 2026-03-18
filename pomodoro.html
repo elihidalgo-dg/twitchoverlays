@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pomodoro</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    font-family: 'Nunito', sans-serif;
+  }
+  #card {
+    background: #FFF8F0;
+    border: 3px solid #F4C49A;
+    border-radius: 24px;
+    padding: 18px 22px 16px;
+    width: 240px;
+    text-align: center;
+    box-shadow: 4px 4px 0px #F4C49A;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+  #modeBadge {
+    display: inline-block;
+    background: #FDDCB5;
+    color: #C47A35;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1.5px solid #F4C49A;
+    margin-bottom: 10px;
+    margin-top: 6px;
+  }
+  #timerBox {
+    background: #FFFAF5;
+    border: 2px solid #F4C49A;
+    border-radius: 16px;
+    padding: 14px 10px 10px;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  #catDeco {
+    position: absolute;
+    top: -14px; right: 10px;
+    font-size: 22px;
+  }
+  #timeDisplay {
+    font-size: 48px;
+    font-weight: 800;
+    color: #C47A35;
+    letter-spacing: 2px;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  #timeDisplay.break      { color: #7CAF7C; }
+  #timeDisplay.long-break { color: #8A7AAB; }
+  #timeDisplay.finished   { color: #D4A0A0; }
+  #sessionCount {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #C47A35;
+    font-weight: 700;
+  }
+  #dotsRow {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #FDDCB5;
+    border: 1.5px solid #F4C49A;
+    transition: background 0.4s, transform 0.3s;
+  }
+  .dot.done {
+    background: #C47A35;
+    border-color: #C47A35;
+    transform: scale(1.2);
+  }
+  #statusBar {
+    background: #FDDCB5;
+    border: 1.5px solid #F4C49A;
+    border-radius: 10px;
+    padding: 5px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #A05C20;
+    letter-spacing: 0.5px;
+  }
+  .running #timeDisplay { animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.65; }
+  }
+  @keyframes starFloat {
+    0%   { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-30px) scale(0.5); opacity: 0; }
+  }
+  .star {
+    position: absolute;
+    font-size: 16px;
+    pointer-events: none;
+    animation: starFloat 1.2s ease-out forwards;
+  }
+</style>
+</head>
+<body>
+<div id="card">
+  <div id="modeBadge">⏳ Listo</div>
+  <div id="timerBox">
+    <div id="catDeco">🐱</div>
+    <div id="timeDisplay">50:00</div>
+    <div id="sessionCount">0 / 10 pomodoros</div>
+    <div id="dotsRow"></div>
+  </div>
+  <div id="statusBar">Conectando al chat...</div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+  const TWITCH_CHANNEL = 'elizabethidalgodg';
+  const TOTAL = 10;
+
+  const MODES = {
+    inicio:   { badge: '🍅 Trabajo',      secs: 50*60, cat: '🐱', cls: '',           status: '¡Enfocada! 💪' },
+    descanso: { badge: '🍵 Pausa corta',  secs:  5*60, cat: '😸', cls: 'break',      status: 'Descansa un poco ☕' },
+    largo:    { badge: '🌸 Pausa larga',  secs: 15*60, cat: '😻', cls: 'long-break', status: '¡Descanso largo! 🌙' },
+    fin:      { badge: '✨ Sesión lista', secs:     0, cat: '🎉', cls: 'finished',   status: '¡Lo lograste hoy! 🌟' }
+  };
+
+  let secondsLeft        = 50 * 60;
+  let running            = false;
+  let interval           = null;
+  let completedPomodoros = 0;
+
+  function fmt(s) {
+    return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
+  }
+
+  function buildDots() {
+    const row = document.getElementById('dotsRow');
+    row.innerHTML = '';
+    for (let i = 0; i < TOTAL; i++) {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i < completedPomodoros ? ' done' : '');
+      row.appendChild(d);
+    }
+  }
+
+  function updateUI(mode) {
+    const m = MODES[mode];
+    document.getElementById('modeBadge').textContent    = m.badge;
+    document.getElementById('catDeco').textContent      = m.cat;
+    document.getElementById('statusBar').textContent    = m.status;
+    document.getElementById('timeDisplay').className    = m.cls;
+    document.getElementById('timeDisplay').textContent  = fmt(secondsLeft);
+    document.getElementById('sessionCount').textContent = completedPomodoros + ' / ' + TOTAL + ' pomodoros';
+    buildDots();
+  }
+
+  function stopTimer() {
+    clearInterval(interval);
+    running = false;
+    document.getElementById('card').classList.remove('running');
+  }
+
+  function startCountdown(mode) {
+    stopTimer();
+    secondsLeft = MODES[mode].secs;
+    updateUI(mode);
+    if (secondsLeft === 0) return;
+    running = true;
+    document.getElementById('card').classList.add('running');
+    interval = setInterval(() => {
+      if (secondsLeft <= 0) {
+        stopTimer();
+        if (mode === 'inicio') {
+          completedPomodoros = Math.min(completedPomodoros + 1, TOTAL);
+          spawnStars();
+          try {
+            const bell = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+            bell.play();
+          } catch(e) {}
+        }
+        updateUI(mode);
+        return;
+      }
+      secondsLeft--;
+      document.getElementById('timeDisplay').textContent  = fmt(secondsLeft);
+      document.getElementById('sessionCount').textContent = completedPomodoros + ' / ' + TOTAL + ' pomodoros';
+    }, 1000);
+  }
+
+  function handleCommand(msg) {
+    msg = msg.trim().toLowerCase();
+    if      (msg === '!inicio')   { startCountdown('inicio'); }
+    else if (msg === '!descanso') { startCountdown('descanso'); }
+    else if (msg === '!largo')    { startCountdown('largo'); }
+    else if (msg === '!alto' || msg === '!pausa') {
+  if (running) {
+    stopTimer();
+    document.getElementById('statusBar').textContent = '⏸ En pausa · escribe !alto para continuar';
+  } else if (secondsLeft > 0) {
+    running = true;
+    document.getElementById('card').classList.add('running');
+    document.getElementById('statusBar').textContent = '¡Continuando! 💪';
+    interval = setInterval(() => {
+      if (secondsLeft <= 0 && running) {
+        stopTimer();
+        completedPomodoros = Math.min(completedPomodoros + 1, TOTAL);
+        spawnStars();
+        try {
+          const bell = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+          bell.play();
+        } catch(e) {}
+        updateUI('inicio');
+        return;
+      }
+      secondsLeft--;
+      document.getElementById('timeDisplay').textContent  = fmt(secondsLeft);
+      document.getElementById('sessionCount').textContent = completedPomodoros + ' / ' + TOTAL + ' pomodoros';
+    }, 1000);
+  }
+}
+else if (msg === '!reiniciar') {
+  stopTimer();
+  secondsLeft = MODES.inicio.secs;
+  completedPomodoros = 0;
+  updateUI('inicio');
+}
+```
+
+---
+
+**Borrar el chat** — eso no se hace desde un widget, se hace directo en Twitch. En tu chat escribe:
+```
+/clear
+    else if (msg === '!fin') {
+      stopTimer();
+      completedPomodoros = 0;
+      secondsLeft = 0;
+      updateUI('fin');
+    }
+  }
+
+  function spawnStars() {
+    const emojis = ['⭐','✨','🌟','💛','☕'];
+    const card   = document.getElementById('card');
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => {
+        const s       = document.createElement('div');
+        s.className   = 'star';
+        s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        s.style.left  = (20 + Math.random() * 180) + 'px';
+        s.style.top   = (40 + Math.random() * 80)  + 'px';
+        card.appendChild(s);
+        setTimeout(() => s.remove(), 1300);
+      }, i * 120);
+    }
+  }
+
+  function connectToChat() {
+    const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+    ws.onopen = () => {
+      ws.send('PASS oauth:notoken');
+      ws.send('NICK justinfan' + Math.floor(Math.random() * 99999));
+      ws.send('JOIN #' + TWITCH_CHANNEL);
+      document.getElementById('statusBar').textContent = '💬 Chat conectado · escribe !inicio';
+    };
+    ws.onmessage = (event) => {
+      const raw = event.data;
+      if (raw.startsWith('PING')) { ws.send('PONG :tmi.twitch.tv'); return; }
+      const match = raw.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\S+ :(.+)/);
+      if (match) handleCommand(match[2].trim());
+    };
+    ws.onerror = () => {
+      document.getElementById('statusBar').textContent = '⚠️ Error de conexión';
+    };
+    ws.onclose = () => {
+      document.getElementById('statusBar').textContent = '🔄 Reconectando...';
+      setTimeout(connectToChat, 5000);
+    };
+  }
+
+  buildDots();
+  connectToChat();
+
+});
+</script>
+</body>
+</html>

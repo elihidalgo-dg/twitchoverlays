@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Objetivo del día</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: transparent;
+    font-family: 'Quicksand', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 4px;
+  }
+
+  #card {
+    width: 280px;
+    height: 150px;
+    background: linear-gradient(145deg, #FFF0F7, #FFE4F0);
+    border: 3px solid #FFB7D5;
+    border-radius: 28px;
+    padding: 14px 18px 16px;
+    box-shadow: 0 5px 0 #E896BA, 0 0 20px rgba(255,183,213,0.3);
+    animation: popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  #card::after {
+    content: '🌸';
+    position: absolute;
+    bottom: -4px; right: 8px;
+    font-size: 36px;
+    opacity: 0.15;
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  #header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 10px;
+  }
+
+  #icon { font-size: 20px; }
+
+  #title {
+    font-family: 'Pacifico', cursive;
+    font-size: 13px;
+    color: #D4679A;
+  }
+
+  #divider {
+    height: 2px;
+    background: linear-gradient(to right, #FFB7D5, transparent);
+    border-radius: 2px;
+    margin-bottom: 10px;
+  }
+
+  #objetivo-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #8B4060;
+    line-height: 1.5;
+    min-height: 20px;
+    word-break: break-word;
+    transition: opacity 0.3s;
+  }
+
+  #objetivo-text.empty {
+    color: #D4A0BC;
+    font-style: italic;
+    font-weight: 500;
+  }
+
+  #footer {
+    margin-top: 8px;
+    font-size: 10px;
+    color: #D4A0BC;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: right;
+  }
+
+  /* Animación al cambiar el objetivo */
+  @keyframes textPop {
+    0%   { transform: scale(0.95); opacity: 0.5; }
+    100% { transform: scale(1);    opacity: 1; }
+  }
+  .pop { animation: textPop 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+</style>
+</head>
+<body>
+<div id="card">
+  <div id="header">
+    <span id="icon">🎯</span>
+    <span id="title">objetivo de hoy</span>
+  </div>
+  <div id="divider"></div>
+  <div id="objetivo-text" class="empty">escribe !objetivo + tu meta ✨</div>
+  <div id="footer" id="updated-at"></div>
+</div>
+
+<script>
+const TWITCH_CHANNEL = 'elizabethidalgodg';
+const TU_USUARIO     = 'elizabethidalgodg';
+
+function setObjetivo(text) {
+  const el = document.getElementById('objetivo-text');
+  el.textContent = text;
+  el.classList.remove('empty', 'pop');
+  void el.offsetWidth; // reflow para reiniciar animación
+  el.classList.add('pop');
+
+  const now = new Date();
+  const h   = String(now.getHours()).padStart(2,'0');
+  const m   = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('footer').textContent = 'actualizado ' + h + ':' + m;
+}
+
+function handleCommand(user, msg) {
+  if (user !== TU_USUARIO) return;
+  const raw   = msg.trim();
+  const lower = raw.toLowerCase();
+
+  if (lower.startsWith('!objetivo ')) {
+    const text = raw.slice(10).trim();
+    if (text) setObjetivo(text);
+  } else if (lower === '!objetivo') {
+    const el = document.getElementById('objetivo-text');
+    el.textContent = 'escribe !objetivo + tu meta ✨';
+    el.className = 'empty';
+    document.getElementById('footer').textContent = '';
+  }
+}
+
+function connectToChat() {
+  const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+  ws.onopen = () => {
+    ws.send('PASS oauth:notoken');
+    ws.send('NICK justinfan' + Math.floor(Math.random() * 99999));
+    ws.send('JOIN #' + TWITCH_CHANNEL);
+  };
+  ws.onmessage = (event) => {
+    const raw = event.data;
+    if (raw.startsWith('PING')) { ws.send('PONG :tmi.twitch.tv'); return; }
+    const match = raw.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\S+ :(.+)/);
+    if (match) handleCommand(match[1].toLowerCase(), match[2].trim());
+  };
+  ws.onclose = () => setTimeout(connectToChat, 5000);
+}
+
+connectToChat();
+</script>
+</body>
+</html>

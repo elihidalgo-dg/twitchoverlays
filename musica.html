@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Música</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: transparent;
+    font-family: 'Nunito', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 4px;
+  }
+
+  #card {
+    background: #FFF8F0;
+    border: 3px solid #F4C49A;
+    border-radius: 24px;
+    padding: 12px 16px;
+    width: 260px;
+    box-shadow: 4px 4px 0px #F4C49A;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+
+  @keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  #header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 8px;
+  }
+
+  #note {
+    font-size: 18px;
+    animation: sway 2s ease-in-out infinite;
+  }
+
+  @keyframes sway {
+    0%,100% { transform: rotate(-8deg); }
+    50%      { transform: rotate(8deg); }
+  }
+
+  #title {
+    font-size: 12px;
+    font-weight: 800;
+    color: #C47A35;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  #divider {
+    height: 2px;
+    background: linear-gradient(to right, #F4C49A, transparent);
+    border-radius: 2px;
+    margin-bottom: 10px;
+  }
+
+  #playlist-box {
+    background: #FFFAF5;
+    border: 1.5px solid #F4C49A;
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  #vinyl {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #FDDCB5;
+    border: 3px solid #F4C49A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  #vinyl.playing {
+    animation: spin 4s linear infinite;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  #info { flex: 1; min-width: 0; }
+
+  #playlist-name {
+    font-size: 12px;
+    font-weight: 800;
+    color: #7A5030;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+
+  #playlist-name.empty {
+    color: #D4B090;
+    font-weight: 500;
+    font-style: italic;
+  }
+
+  #link {
+    font-size: 10px;
+    color: #C47A35;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+  }
+
+  #link:hover { text-decoration: underline; }
+  #link.hidden { display: none; }
+
+  /* Barrita de onda animada */
+  #wave {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .bar {
+    width: 3px;
+    background: #F4C49A;
+    border-radius: 2px;
+    animation: wave 1s ease-in-out infinite;
+  }
+  .bar:nth-child(1) { animation-delay: 0s;    height: 6px; }
+  .bar:nth-child(2) { animation-delay: 0.2s;  height: 10px; }
+  .bar:nth-child(3) { animation-delay: 0.4s;  height: 14px; }
+  .bar:nth-child(4) { animation-delay: 0.2s;  height: 10px; }
+  .bar:nth-child(5) { animation-delay: 0s;    height: 6px; }
+
+  @keyframes wave {
+    0%,100% { transform: scaleY(0.4); }
+    50%      { transform: scaleY(1); }
+  }
+
+  #wave.paused .bar { animation-play-state: paused; }
+
+  #status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+
+  #status-text {
+    font-size: 10px;
+    font-weight: 700;
+    color: #D4B090;
+    letter-spacing: 0.5px;
+  }
+
+  #status-text.playing { color: #C47A35; }
+</style>
+</head>
+<body>
+<div id="card">
+  <div id="header">
+    <span id="note">🎵</span>
+    <span id="title">escuchando</span>
+  </div>
+  <div id="divider"></div>
+  <div id="playlist-box">
+    <div id="vinyl">🎶</div>
+    <div id="info">
+      <div id="playlist-name" class="empty">Escuchando ✨</div>
+      <a id="link" class="hidden" href="https://harrisheller.com/streambeats" target="_blank">ver en StreamBeats ↗</a>
+    </div>
+    <div id="wave" class="paused">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
+    </div>
+  </div>
+  <div id="status-row">
+    <span id="status-text">sin música</span>
+  </div>
+</div>
+
+<script>
+const TWITCH_CHANNEL = 'elizabethidalgodg';
+const TU_USUARIO     = 'elizabethidalgodg';
+
+function setMusica(nombre) {
+  const nameEl   = document.getElementById('playlist-name');
+  const linkEl   = document.getElementById('link');
+  const vinyl    = document.getElementById('vinyl');
+  const wave     = document.getElementById('wave');
+  const status   = document.getElementById('status-text');
+
+  nameEl.textContent = nombre;
+  nameEl.classList.remove('empty');
+  linkEl.classList.remove('hidden');
+  vinyl.classList.add('playing');
+  wave.classList.remove('paused');
+  status.textContent = '▶ reproduciendo';
+  status.classList.add('playing');
+}
+
+function clearMusica() {
+  const nameEl = document.getElementById('playlist-name');
+  const linkEl = document.getElementById('link');
+  const vinyl  = document.getElementById('vinyl');
+  const wave   = document.getElementById('wave');
+  const status = document.getElementById('status-text');
+
+  nameEl.textContent = 'escribe !musica + playlist ✨';
+  nameEl.classList.add('empty');
+  linkEl.classList.add('hidden');
+  vinyl.classList.remove('playing');
+  wave.classList.add('paused');
+  status.textContent = 'sin música';
+  status.classList.remove('playing');
+}
+
+function handleCommand(user, msg) {
+  if (user !== TU_USUARIO) return;
+  const raw   = msg.trim();
+  const lower = raw.toLowerCase();
+
+  if (lower.startsWith('!musica ')) {
+    const nombre = raw.slice(8).trim();
+    if (nombre) setMusica(nombre);
+  } else if (lower === '!musica') {
+    clearMusica();
+  }
+}
+
+function connectToChat() {
+  const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+  ws.onopen = () => {
+    ws.send('PASS oauth:notoken');
+    ws.send('NICK justinfan' + Math.floor(Math.random() * 99999));
+    ws.send('JOIN #' + TWITCH_CHANNEL);
+  };
+  ws.onmessage = (event) => {
+    const raw = event.data;
+    if (raw.startsWith('PING')) { ws.send('PONG :tmi.twitch.tv'); return; }
+    const match = raw.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\S+ :(.+)/);
+    if (match) handleCommand(match[1].toLowerCase(), match[2].trim());
+  };
+  ws.onclose = () => setTimeout(connectToChat, 5000);
+}
+
+connectToChat();
+</script>
+</body>
+</html>
