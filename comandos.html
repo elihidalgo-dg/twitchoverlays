@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comandos · elizabethidalgodg</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #FFF8F0;
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px;
+  }
+
+  .page {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .header-cat { font-size: 40px; display: block; margin-bottom: 8px; }
+
+  .header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #C47A35;
+    margin-bottom: 4px;
+  }
+
+  .header p {
+    font-size: 13px;
+    color: #B8A090;
+    font-weight: 700;
+  }
+
+  .header-divider {
+    height: 3px;
+    background: linear-gradient(to right, transparent, #F4C49A, transparent);
+    border-radius: 2px;
+    margin-top: 16px;
+  }
+
+  /* Sección */
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #C47A35;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 4px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1.5px;
+    background: #F4C49A;
+    border-radius: 2px;
+  }
+
+  /* Tabla de comandos */
+  .cmd-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .cmd-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #FFFAF5;
+    border: 1.5px solid #F4C49A;
+    border-radius: 12px;
+    padding: 10px 14px;
+    transition: transform 0.15s;
+  }
+
+  .cmd-row:hover { transform: translateX(3px); }
+
+  .cmd-tag {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    font-weight: 800;
+    color: #C47A35;
+    background: #FDDCB5;
+    border: 1px solid #F4C49A;
+    border-radius: 8px;
+    padding: 3px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .cmd-info { flex: 1; }
+
+  .cmd-desc {
+    font-size: 12px;
+    font-weight: 700;
+    color: #7A5030;
+    line-height: 1.4;
+  }
+
+  .cmd-who {
+    font-size: 10px;
+    color: #C4956A;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1.5px dashed #F4C49A;
+    font-size: 11px;
+    color: #D4B090;
+    font-weight: 700;
+  }
+
+  .footer a {
+    color: #C47A35;
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <span class="header-cat">🐱</span>
+    <h1>elizabethidalgodg</h1>
+    <p>Lista de comandos del stream ✨</p>
+    <div class="header-divider"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════
+       AQUÍ PUEDES AGREGAR O EDITAR COMANDOS FÁCILMENTE
+       Copia un bloque <div class="cmd-row">...</div>
+       y cambia el comando y la descripción
+  ════════════════════════════════════════════════════ -->
+
+  <div class="section">
+    <div class="section-title">🍅 Pomodoro</div>
+    <div class="cmd-grid">
+      <div class="cmd-row">
+        <span class="cmd-tag">!inicio</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Arranca el timer de trabajo (50 min)</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!descanso</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Pausa corta (5 min)</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!largo</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Pausa larga (15 min)</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!alto / !pausa</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Pausa o retoma el timer donde quedó</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!fin</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Termina la sesión y reinicia los pomodoros</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!reiniciar</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Reinicia el timer desde cero</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">📋 Tareas</div>
+    <div class="cmd-grid">
+      <div class="cmd-row">
+        <span class="cmd-tag">!tarea [texto]</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Agrega una tarea a tu lista personal · ej: !tarea leer 30 min</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!tarea [texto]</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Agrega tu tarea a la lista del chat · ej: !tarea estudiar inglés</div>
+          <div class="cmd-who">Toda la comunidad</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!listo [#]</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Marca una tarea como completada · ej: !listo 2</div>
+          <div class="cmd-who">Cada quien sus propias tareas</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!borrar [#]</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Borra una tarea de la lista · ej: !borrar 1</div>
+          <div class="cmd-who">Cada quien sus propias tareas</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!reset</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Limpia toda la lista de tareas</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">🎯 Objetivo y música</div>
+    <div class="cmd-grid">
+      <div class="cmd-row">
+        <span class="cmd-tag">!objetivo [texto]</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Define el objetivo del día · ej: !objetivo terminar mi tesis</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!musica [nombre]</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Muestra la playlist que estamos escuchando · ej: !musica Lofi Chill</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">☕ Descanso y asistencia</div>
+    <div class="cmd-grid">
+      <div class="cmd-row">
+        <span class="cmd-tag">!brb [min]</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Muestra cuenta regresiva de pausa · ej: !brb 10</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!back / !devuelta</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Oculta la pantalla de pausa</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!presente</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Regístrate en la lista de asistencia del stream</div>
+          <div class="cmd-who">Toda la comunidad</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!lista</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Muestra todos los que hicieron presente hoy</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+      <div class="cmd-row">
+        <span class="cmd-tag">!conteo</span>
+        <div class="cmd-info">
+          <div class="cmd-desc">Muestra cuántas personas hicieron presente</div>
+          <div class="cmd-who">Solo la streamer</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Twitch · <a href="https://twitch.tv/elizabethidalgodg" target="_blank">twitch.tv/elizabethidalgodg</a> 🐱
+  </div>
+
+</div>
+</body>
+</html>
