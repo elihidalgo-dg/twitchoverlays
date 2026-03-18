@@ -47,11 +47,12 @@
     transition: width 0.5s cubic-bezier(0.34,1.56,0.64,1);
   }
   #progressLabel { font-size: 10px; font-weight: 700; color: #C47A35; text-align: right; margin-bottom: 10px; }
-  #taskList { display: flex; 
+  #taskList { 
+   display: flex; 
     flex-direction: column; 
     gap: 5px;
   max-height: 300px;
-overflow-y: auto;
+overflow-y: hidden;
 scrollbar-width: none; }
 
   .task-item {
@@ -124,6 +125,7 @@ function renderTasks() {
       '<div class="task-text">' + t.text + '</div>' +
       (t.done ? '<div class="task-check">✅</div>' : '');
     list.appendChild(item);
+   list.scrollTop = list.scrollHeight;
   });
 }
 
