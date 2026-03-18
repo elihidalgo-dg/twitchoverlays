@@ -51,8 +51,8 @@
     flex-direction: column; 
     gap: 5px;
   max-height: 300px;
-overflow-y: auto;
-scrollbar-width: none; }
+overflow-y: hidden;
+scrollbar-behavior: smooth; }
 
   .task-item {
     display: flex;
@@ -131,6 +131,14 @@ function renderTasks() {
       '</div>' +
       (t.done ? '<div class="task-check">✅</div>' : '');
     list.appendChild(item);
+   function autoScroll() {
+  if (list.scrollTop + list.clientHeight >= list.scrollHeight) {
+    list.scrollTop = 0;
+  } else {
+    list.scrollTop += 1;
+  }
+}
+setInterval(autoScroll, 30);
   });
 }
 
