@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let running            = false;
   let interval           = null;
   let completedPomodoros = 0;
+  let currentMode = 'inicio';
 
   function fmt(s) {
     return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
@@ -179,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function startCountdown(mode) {
+   currentMode = mode;
     stopTimer();
     secondsLeft = MODES[mode].secs;
     updateUI(mode);
@@ -208,8 +210,14 @@ document.addEventListener('DOMContentLoaded', function() {
   function handleCommand(msg) {
     msg = msg.trim().toLowerCase();
     if      (msg === '!inicio')   { startCountdown('inicio'); }
-    else if (msg === '!descanso') { startCountdown('descanso'); }
-    else if (msg === '!largo')    { startCountdown('largo'); }
+    else if (msg === '!descanso') {
+  if (currentMode === 'inicio') completedPomodoros = Math.min(completedPomodoros + 1, TOTAL);
+  startCountdown('descanso');
+}
+else if (msg === '!largo') {
+  if (currentMode === 'inicio') completedPomodoros = Math.min(completedPomodoros + 1, TOTAL);
+  startCountdown('largo');
+}
     else if (msg === '!alto' || msg === '!pausa') {
   if (running) {
     stopTimer();
