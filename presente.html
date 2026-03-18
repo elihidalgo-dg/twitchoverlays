@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Presente</title>
+</head>
+<body>
+<script>
+const TWITCH_CHANNEL  = 'elizabethidalgodg';
+const BOT_USER        = 'elizabethidalgodg';
+const OAUTH_TOKEN     = 'oauth:y1u0jr143ahwlpunfjj6vzx1m7rjtp';
+
+let presentes = [];
+
+function enviarMensaje(msg) {
+  ws.send('PRIVMSG #' + TWITCH_CHANNEL + ' :' + msg);
+}
+
+let ws;
+
+function connectToChat() {
+  ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+
+  ws.onopen = () => {
+    ws.send('PASS ' + OAUTH_TOKEN);
+    ws.send('NICK ' + BOT_USER);
+    ws.send('JOIN #' + TWITCH_CHANNEL);
+  };
+
+  ws.onmessage = (event) => {
+    const raw = event.data;
+    if (raw.startsWith('PING')) { ws.send('PONG :tmi.twitch.tv'); return; }
+
+    const match = raw.match(/:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG #\S+ :(.+)/);
+    if (!match) return;
+
+    const user = match[1].toLowerCase();
+    const msg  = match[2].trim().toLowerCase();
+
+    if (msg === '!presente') {
+      if (!presentes.includes(user)) {
+        presentes.push(user);
+        enviarMensaje('¡Hola @' + user + ', ya estás en la lista de hoy! ✨ (' + presentes.length + ' presentes)');
+      } else {
+        enviarMensaje('@' + user + ' ya hiciste presente anteriormente 😊');
+      }
+    }
+
+    else if (msg === '!lista' && user === BOT_USER) {
+      if (presentes.length === 0) {
+        enviarMensaje('Aún nadie ha hecho presente hoy 🌸');
+      } else {
+        enviarMensaje('📋 Presentes hoy (' + presentes.length + '): ' + presentes.map(u => '@' + u).join(', '));
+      }
+    }
+
+    else if (msg === '!conteo' && user === BOT_USER) {
+      enviarMensaje('Hoy han hecho presente ' + presentes.length + ' persona(s) 🎉');
+    }
+
+    else if (msg === '!resetpresente' && user === BOT_USER) {
+      presentes = [];
+      enviarMensaje('Lista de presentes reiniciada ✅');
+    }
+  };
+
+  ws.onclose = () => setTimeout(connectToChat, 5000);
+}
+
+connectToChat();
+</script>
+</body>
+</html>
